@@ -2,15 +2,17 @@
 
 A final project as submission for Mobile Programming course
 
-## Getting Started
+| Name                               | NRP        |
+|------------------------------------|------------|
+| Duevano Fairuz Pandya              | 5025211052 |
+| Muhammad Nabil Akhtar Raya Amoriza | 5025221021 | 
+| Fauzan Dzikri Rabbani              | 5025221311 |
 
-This project is a starting point for a Flutter application.
+## Leafy (Log?)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This project is a starting point for a Flutter application.  
+Core Functions:  
+- Create and Maintain your own plants
+- Create Care logs to track down your plant's maintenance
+- Schedule Tasks and Notifications
+- Access the Plant Encyclopedia
