@@ -1,3 +1,7 @@
+import 'package:ppb_fp_9/screens/home_item/encyclopedia_item.dart';
+import 'package:ppb_fp_9/screens/home_item/home_item.dart';
+import 'package:ppb_fp_9/screens/home_item/plants_item.dart';
+import 'package:ppb_fp_9/screens/home_item/schedules_item.dart';
 import 'package:ppb_fp_9/screens/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,23 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Daftar tampilan konten per tab
   List<Widget> _pages(User? user) => [
-    Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(child: Text('Home - Logged in as ${user?.email ?? "Unknown"}')),
-          Center(
-            child: OutlinedButton(
-              onPressed: () => logout(context),
-              child: const Text('Logout'),
-            ),
-          ),
-        ],
-      ),
-    ),
-    const Center(child: Text('Plants Page')),
-    const Center(child: Text('Schedules Page')),
-    const Center(child: Text('Encyclopedia Page')),
+    HomeItem(user: user, onLogout: () => logout(context)),
+    PlantsItem(),
+    SchedulesItem(),
+    EncyclopediaItem(),
   ];
 
   void _onItemTapped(int index) {
@@ -60,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
           return Scaffold(
             backgroundColor: Color(0xFFEDFFF1),
             appBar: AppBar(
-              title: const Text('Leafy'),
+              backgroundColor: Color(0xFF046526),
+              title: const Text('Leafy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
               centerTitle: true,
             ),
             body: _pages(snapshot.data)[_selectedIndex], // Ganti berdasarkan tab
