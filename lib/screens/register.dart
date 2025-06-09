@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   bool _isLoading = false;
   String _errorCode = "";
@@ -66,6 +67,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // color: Colors.blue[200],
               ),
               const SizedBox(height: 48),
+              TextField(
+                controller: _usernameController,
+                cursorColor: Color(0xFF046526),
+                style: TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: "Username",
+                  labelStyle: TextStyle(color: Color(0xFF046526)),
+                  hintStyle: TextStyle(color: Color(0xFF046526)),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black38),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF046526)),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12,),
               TextField(
                 controller: _emailController,
                 cursorColor: Color(0xFF046526),
@@ -129,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const Text('Already have an account?'),
                   TextButton(
                     onPressed: navigateLogin,
-                    child: const Text('Login', style: TextStyle(color: Color(0xFF046526)),),
+                    child: const Text('Login now', style: TextStyle(color: Color(0xFF046526)),),
                   )
                 ],
               )
