@@ -3,23 +3,21 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/repository/plants_repository.dart';
-import 'package:tni_al/data/repositories/products/product_repository.dart';
-import 'package:tni_al/features/shop/models/category_model.dart';
-import 'package:tni_al/utils/popups/loaders.dart';
+// import 'package:tni_al/data/repositories/products/product_repository.dart';
+// import 'package:tni_al/features/shop/models/category_model.dart';
+// import 'package:tni_al/utils/popups/loaders.dart';
+//
+// import '../../models/product_model.dart';
 
-import '../../models/product_model.dart';
-
-class ProductController extends GetxController {
-  static ProductController get instance => Get.find();
+class PlantsController extends GetxController {
+  static PlantsController get instance => Get.find();
 
   final isLoading = false.obs;
   final plantsRepository = Get.put(PlantsRepository());
-  final RxList<PlantsModel> featuredProducts = <PlantsModel>[].obs;
-  final RxList<PlantsModel> featuredCategoryProducts = <PlantsModel>[].obs;
+  final RxList<PlantsModel> allPlants = <PlantsModel>[].obs;
 
   @override
   void onInit() {
-    fetchAllPlants();
     super.onInit();
   }
 
@@ -29,7 +27,7 @@ class ProductController extends GetxController {
 
       final plants = await plantsRepository.fetchPlants();
 
-      featuredProducts.assignAll(plants);
+      allPlants.assignAll(plants);
     } catch (e) {
       Get.snackbar(
         'Oh Snap!',
@@ -54,7 +52,7 @@ class ProductController extends GetxController {
     } catch (e) {
       Get.snackbar(
         "Data not saved!",
-        "Something went wrong while saving your information. Please try again later.",
+        e.toString(),
         isDismissible: true,
         shouldIconPulse: true,
         colorText: Colors.white,

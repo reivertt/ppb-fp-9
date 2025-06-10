@@ -14,9 +14,9 @@ class PlantsRepository extends GetxController {
   // function to save user data to firestore
   Future<void> savePlant(PlantsModel plant) async {
     try {
-      print('DEBUG (user_repositories.dart): Coba save user ke firebase firestore');
-      await _db.collection('Users').doc(plant.id).set(plant.toFirestore());
-      print('DEBUG (user_repositories.dart): selesai save user ke firebase firestore');
+      await _db
+          .collection('plants').doc(plant.id)
+          .set(plant.toFirestore());
     } catch (e) {
       throw 'Something went wrong. Please try again.';
     }
@@ -28,9 +28,12 @@ class PlantsRepository extends GetxController {
           // .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
           .collection("plants")
           .get();
+      print("DEBUG plants (snapshot): ${documentSnapshot}");
+      print("DEBUG plants (PlantsModel):  ${documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList()[0].commonName}");
       return documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList();
     } catch (e) {
-      throw 'Something went wrong. Please try again';
+      rethrow;
+      // throw 'Something went wrong. Please try again';
     }
   }
 
@@ -62,7 +65,8 @@ class PlantsRepository extends GetxController {
       // }
       await _db.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants").doc(plantId).delete();
     } catch (e) {
-      throw 'Something went wrong. Please try again';
+      rethrow;
+      // throw 'Something went wrong. Please try again';
     }
   }
 
