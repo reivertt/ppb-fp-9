@@ -52,7 +52,7 @@ class _PlantsItemState extends State<PlantsItem> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Image.network(
-                  plantsController.allPlants.imageUrl,
+                  plantsController.allPlants[index].imgUrl!,
                   height: 150,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
@@ -66,7 +66,7 @@ class _PlantsItemState extends State<PlantsItem> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text(
-                    plantsController.allPlants.commonName,
+                    plantsController.allPlants[index].commonName,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),

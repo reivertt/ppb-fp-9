@@ -28,8 +28,8 @@ class PlantsRepository extends GetxController {
           // .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
           .collection("plants")
           .get();
-      print("DEBUG plants (snapshot): ${documentSnapshot}");
-      print("DEBUG plants (PlantsModel):  ${documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList()[0].commonName}");
+      // print("DEBUG plants (snapshot): ${documentSnapshot}");
+      // print("DEBUG plants (PlantsModel):  ${documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList()[0].commonName}");
       return documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList();
     } catch (e) {
       rethrow;
