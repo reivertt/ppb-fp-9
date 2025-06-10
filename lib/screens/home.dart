@@ -72,14 +72,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             body: _pages(snapshot.data)[_selectedIndex], // Ganti berdasarkan tab
             bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: Color(0xFFFCFDFC),
+              // backgroundColor: Color(0xFFFCFDFC),
+              backgroundColor: const Color(0xFF046526),
               currentIndex: _selectedIndex,
               onTap: _onItemTapped,
               type: BottomNavigationBarType.fixed,
 
               // Warna ikon & label saat aktif & tidak aktif
-              selectedItemColor: const Color(0xFF046526),
-              unselectedItemColor: Colors.grey,
+              // selectedItemColor: const Color(0xFF046526),
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white.withAlpha(150),
 
               // Style teks
               selectedLabelStyle: const TextStyle(
