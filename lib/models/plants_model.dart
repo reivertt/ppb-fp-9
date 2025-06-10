@@ -6,9 +6,9 @@ class PlantsModel {
   final String? customName;
   final String commonName;
   final String? imgUrl;
-  final Timestamp plantedDate;
-  final Timestamp createdAt;
-  final Timestamp updatedAt;
+  final Timestamp? plantedDate;
+  final Timestamp? createdAt;
+  final Timestamp? updatedAt;
 
   PlantsModel({
     this.id,
@@ -48,4 +48,15 @@ class PlantsModel {
       'updatedAt': updatedAt,
     };
   }
+
+  static PlantsModel empty() => PlantsModel(
+    id: '',
+    userId: '',
+    customName: '',
+    commonName: '',
+    imgUrl: '',
+    plantedDate: null,
+    createdAt: null,
+    updatedAt: null,
+  );
 }
