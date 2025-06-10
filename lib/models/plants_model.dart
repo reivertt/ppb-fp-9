@@ -6,9 +6,9 @@ class PlantsModel {
   final String? customName;
   final String commonName;
   final String? imgUrl;
-  final Timestamp plantedDate;
-  final Timestamp createdAt;
-  final Timestamp updatedAt;
+  final Timestamp? plantedDate;
+  final Timestamp? createdAt;
+  final Timestamp? updatedAt;
 
   PlantsModel({
     this.id,
@@ -22,7 +22,7 @@ class PlantsModel {
   });
 
   // Factory constructor to create a Plant from a Firestore document
-  factory PlantsModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot, SnapshotOptions? options) {
+  factory PlantsModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data()!;
     return PlantsModel(
       id: snapshot.id,
@@ -48,4 +48,15 @@ class PlantsModel {
       'updatedAt': updatedAt,
     };
   }
+
+  static PlantsModel empty() => PlantsModel(
+    id: '',
+    userId: '',
+    customName: '',
+    commonName: '',
+    imgUrl: '',
+    plantedDate: null,
+    createdAt: null,
+    updatedAt: null,
+  );
 }

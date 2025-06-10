@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ppb_fp_9/screens/home_item/temp_plant.dart';
+import 'package:get/get.dart';
+import 'package:ppb_fp_9/controller/plants_controller.dart';
 
 class PlantsItem extends StatefulWidget {
   const PlantsItem({super.key});
@@ -9,11 +10,19 @@ class PlantsItem extends StatefulWidget {
 }
 
 class _PlantsItemState extends State<PlantsItem> {
-  List<Plants> plants = [
-    Plants(userId: "user1", commonName: "kedelai", imageUrl: "https://picsum.photos/id/18/200/300"),
-    Plants(userId: "user2", commonName: "kacang tanah", imageUrl: "https://picsum.photos/200"),
-    Plants(userId: "user2", commonName: "daun bawang", imageUrl: "https://picsum.photos/200"),
-  ];
+  final PlantsController plantsController = Get.put(PlantsController());
+
+  // List<Plants> plants = [
+  //   Plants(userId: "user1", commonName: "kedelai", imageUrl: "https://picsum.photos/id/18/200/300"),
+  //   Plants(userId: "user2", commonName: "kacang tanah", imageUrl: "https://picsum.photos/200"),
+  //   Plants(userId: "user2", commonName: "daun bawang", imageUrl: "https://picsum.photos/200"),
+  // ];
+
+  @override
+  void initState() {
+    super.initState();
+    plantsController.fetchAllPlants();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +35,10 @@ class _PlantsItemState extends State<PlantsItem> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(20), // Padding untuk keseluruhan list
-        itemCount: plants.length, // sinkron ListView berapa banyak item yang akan dibuat
+        itemCount: plantsController.allPlants.length, // sinkron ListView berapa banyak item yang akan dibuat
         itemBuilder: (context, index) {
           // Ambil satu tanaman berdasarkan posisinya (index)
-          final plant = plants[index];
+          final plant = plantsController.allPlants[index];
 
           // Kembalikan widget Card untuk tanaman tersebut
           return Card(
@@ -43,7 +52,7 @@ class _PlantsItemState extends State<PlantsItem> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Image.network(
-                  plant.imageUrl,
+                  plantsController.allPlants.imageUrl,
                   height: 150,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
@@ -57,7 +66,7 @@ class _PlantsItemState extends State<PlantsItem> {
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Text(
-                    plant.commonName,
+                    plantsController.allPlants.commonName,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
