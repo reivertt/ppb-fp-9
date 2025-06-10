@@ -9,18 +9,76 @@ class HomeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(child: Text('Home - Logged in as ${user?.email ?? "Unknown"}')),
-          Center(
-            child: OutlinedButton(
-              onPressed: onLogout,
-              child: const Text('Logout'),
+    return Card(
+      // Memberi sedikit jarak di luar card
+      margin: const EdgeInsets.all(16.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      elevation: 4.0,
+      color: Color(0xFFA5DA23),
+      child: Padding(
+        // Memberi jarak di dalam card agar konten tidak menempel di tepi
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Membuat tinggi card sesuai konten
+          children: [
+            Row(
+              children: [
+                // 1. Avatar Pengguna
+                const CircleAvatar(
+                  radius: 30.0,
+                  backgroundImage: AssetImage('assets/Icon.png'),
+                  backgroundColor: Colors.transparent,
+                ),
+                // Spasi antara avatar dan teks
+                const SizedBox(width: 16.0),
+                // Kolom untuk menata teks secara vertikal
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // Rata kiri
+                    children: [
+                      // 2. Nama Pengguna
+                      const Text(
+                        'Nama Pengguna',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      // 3. Jumlah Tanaman
+                      const Text(
+                        'Jumlah tanaman: 10', // Contoh jumlah
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.white
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            // Spasi antara informasi profil dan tombol logout
+            const SizedBox(height: 24.0),
+            // 4. Tombol Logout
+            SizedBox(
+              width: double.infinity, // Membuat tombol selebar card
+              child: ElevatedButton.icon(
+                onPressed: onLogout,
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

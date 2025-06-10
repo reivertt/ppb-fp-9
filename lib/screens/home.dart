@@ -52,8 +52,23 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Color(0xFFEDFFF1),
             appBar: AppBar(
               backgroundColor: Color(0xFF046526),
-              title: const Text('Leafy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-              centerTitle: true,
+              title: Row(
+                children: [
+                  Image.asset(
+                    'assets/appbar-logo.png',
+                    height: 24,
+                  ),
+                  SizedBox(width: 12,),
+                  Text(
+                    'Leafy',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                ],
+              )
             ),
             body: _pages(snapshot.data)[_selectedIndex], // Ganti berdasarkan tab
             bottomNavigationBar: BottomNavigationBar(
