@@ -5,17 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
-import 'package:tni_al/utils/exceptions/firebase_auth_exceptions.dart';
-import 'package:tni_al/utils/exceptions/firebase_exceptions.dart';
-import 'package:tni_al/utils/exceptions/format_exceptions.dart';
-import 'package:tni_al/utils/exceptions/platform_exceptions.dart';
-
-import '../authentication/authentication_repository.dart';
 
 class PlantsRepository extends GetxController {
   static PlantsRepository get instance => Get.find();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final _db = FirebaseFirestore.instance;
 
   // function to save user data to firestore
   Future<void> savePlant(PlantsModel plant) async {
@@ -28,18 +22,12 @@ class PlantsRepository extends GetxController {
     }
   }
 
-  Future<PlantsModel> fetchPlantDetails() async {
+  Future<List<PlantsModel>> fetchPlants() async {
     try {
       final documentSnapshot = await _db
-          .collection("Plants")
-          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants")
           .get();
-
-      if (documentSnapshot.exists) {
-        return PlantsModel.fromFirestore(documentSnapshot);
-      } else {
-        return PlantsModel.empty();
-      }
+      return documentSnapshot.docs.map((document) => PlantsModel.fromFirestore(document)).toList();
     } catch (e) {
       throw 'Something went wrong. Please try again';
     }
@@ -48,17 +36,17 @@ class PlantsRepository extends GetxController {
 
   Future<void> updatePlantDetails(PlantsModel updatedPlant) async {
     try {
-      await _db.collection("Plants").doc(updatedPlant.id).update(updatedPlant.toFirestore());
+      await _db.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants").doc(updatedPlant.id).update(updatedPlant.toFirestore());
     } catch (e) {
       throw 'Something went wrong. Please try again';
     }
   }
 
-  Future<void> updateSingleField(Map<String, dynamic> json) async {
+  Future<void> updateSingleField(Map<String, dynamic> json, String plantId) async {
     try {
       await _db
-          .collection("Plants")
-          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants")
+          .doc(plantId)
           .update(json);
     } catch (e) {
       throw 'Something went wrong. Please try again';
@@ -71,7 +59,7 @@ class PlantsRepository extends GetxController {
       // if (currentUid != userId) {
       //   throw 'Unauthorized action';
       // }
-      await _db.collection("Plants").doc(plantId).delete();
+      await _db.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants").doc(plantId).delete();
     } catch (e) {
       throw 'Something went wrong. Please try again';
     }

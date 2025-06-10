@@ -22,7 +22,7 @@ class PlantsModel {
   });
 
   // Factory constructor to create a Plant from a Firestore document
-  factory PlantsModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot, SnapshotOptions? options) {
+  factory PlantsModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data()!;
     return PlantsModel(
       id: snapshot.id,
