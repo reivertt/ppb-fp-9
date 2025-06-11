@@ -19,4 +19,19 @@ class FireStoreService{
     final logsStream = plants.doc(docID).collection("care-logs").orderBy('timestamp', descending: false).snapshots();
     return logsStream;
   }
+
+  // edit log document for specific plant document
+  Future<void> updateLog(String docID, String docLogID, String newLogTitle, String newLogDescription, Timestamp newLogDate){
+    return plants.doc(docID).collection('care-logs').doc(docLogID).update({
+      'title': newLogTitle,
+      'desc': newLogDescription,
+      'plantdate': newLogDate,
+      'timestamp': Timestamp.now(),
+    });
+  }
+
+  // delete log document for specific plant document
+  Future<void> deleteLog(String docID, String docLogID){
+    return plants.doc(docID).collection('care-logs').doc(docLogID).delete();
+  }
 }
