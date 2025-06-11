@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
+import '../plant_detail.dart';
 
 class PlantsItem extends StatefulWidget {
   const PlantsItem({super.key});
@@ -11,12 +12,6 @@ class PlantsItem extends StatefulWidget {
 
 class _PlantsItemState extends State<PlantsItem> {
   final PlantsController plantsController = Get.put(PlantsController());
-
-  // List<Plants> plants = [
-  //   Plants(userId: "user1", commonName: "kedelai", imageUrl: "https://picsum.photos/id/18/200/300"),
-  //   Plants(userId: "user2", commonName: "kacang tanah", imageUrl: "https://picsum.photos/200"),
-  //   Plants(userId: "user2", commonName: "daun bawang", imageUrl: "https://picsum.photos/200"),
-  // ];
 
   @override
   void initState() {
@@ -29,52 +24,64 @@ class _PlantsItemState extends State<PlantsItem> {
     return Scaffold(
       backgroundColor: Color(0xFFEDFFF1),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){},
+        onPressed: () {},
         backgroundColor: Color(0xFF046526),
-        child: Icon(Icons.add, color: Colors.white, size: 32,),
+        child: Icon(Icons.add, color: Colors.white, size: 32),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(20), // Padding untuk keseluruhan list
-        itemCount: plantsController.allPlants.length, // sinkron ListView berapa banyak item yang akan dibuat
-        itemBuilder: (context, index) {
-          // Ambil satu tanaman berdasarkan posisinya (index)
-          final plant = plantsController.allPlants[index];
+      body: Obx(() { // Bungkus dengan Obx agar UI reaktif terhadap perubahan data
+        if (plantsController.allPlants.isEmpty) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: plantsController.allPlants.length,
+          itemBuilder: (context, index) {
+            final plant = plantsController.allPlants[index];
 
-          // Kembalikan widget Card untuk tanaman tersebut
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16.0),
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            elevation: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Image.network(
-                  plantsController.allPlants[index].imgUrl!,
-                  height: 150,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Icon(Icons.broken_image, size: 50, color: Colors.grey)));
-                  },
+            return InkWell(
+              onTap: () {
+                // 2. NAVIGASI KE HALAMAN DETAIL DENGAN MENGIRIM DATA
+                Get.to(() => PlantDetail(
+                  plantName: plant.commonName,
+                  docID: plant.id!, // Pastikan model Anda punya properti 'id' untuk docID
+                ));
+              },
+              child: Card(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    plantsController.allPlants[index].commonName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                elevation: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Image.network(
+                      plant.imgUrl!,
+                      height: 150,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Icon(Icons.broken_image, size: 50, color: Colors.grey)));
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        plant.commonName,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
