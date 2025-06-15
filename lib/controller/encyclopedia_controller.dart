@@ -7,25 +7,33 @@ import 'package:ppb_fp_9/repository/encyclopedia_repository.dart';
 class EncyclopediaController extends GetxController {
   static EncyclopediaController get instance => Get.find();
 
-  final isLoading = false.obs;
-  final RxList<SpeciesModel> allPlants = <SpeciesModel>[].obs;
-  final Rx<SpeciesModel?> selectedPlant = Rx<SpeciesModel?>(null);
+  final isLoading = true.obs;
+  final isFetchingMore = false.obs;
+  final hasMorePlants = true.obs;
 
+  final RxList<SpeciesModel> allPlants = <SpeciesModel>[].obs;
   final encyclopediaRepository = Get.put(EncyclopediaRepository());
-  int currentPage = 1;
+  int _currentPage = 1;
 
   @override
   void onInit() {
-    fetchAllPlants();
+    fetchInitialPlants();
     super.onInit();
   }
 
-  Future<void> fetchAllPlants() async {
+  Future<void> fetchInitialPlants() async {
     try {
       isLoading.value = true;
-      final plants = await encyclopediaRepository.getAllPlants(
-          page: currentPage);
+      _currentPage = 1;
+      hasMorePlants.value = true;
+
+      final plants = await encyclopediaRepository.getAllPlants(page: _currentPage);
       allPlants.assignAll(plants);
+
+      if (plants.isEmpty) {
+        hasMorePlants.value = false;
+      }
+
     } catch (e) {
       _showErrorSnackbar(e.toString());
     } finally {
@@ -33,9 +41,28 @@ class EncyclopediaController extends GetxController {
     }
   }
 
-  Future<void> loadNextPage() async {
-    currentPage++;
-    await fetchAllPlants();
+  Future<void> fetchMorePlants() async {
+    if (isFetchingMore.value || !hasMorePlants.value) return;
+
+    try {
+      isFetchingMore.value = true;
+      _currentPage++;
+
+      final newPlants = await encyclopediaRepository.getAllPlants(
+          page: _currentPage);
+
+      if (newPlants.isNotEmpty) {
+        allPlants.addAll(
+            newPlants);
+      } else {
+        hasMorePlants.value = false;
+      }
+    } catch (e) {
+      _showErrorSnackbar(e.toString());
+      _currentPage--;
+    } finally {
+      isFetchingMore.value = false;
+    }
   }
 
   void _showErrorSnackbar(String message) {

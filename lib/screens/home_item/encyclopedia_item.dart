@@ -2,24 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ppb_fp_9/controller/encyclopedia_controller.dart';
 import 'package:ppb_fp_9/models/species_model.dart';
+import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 
-import '../plants/add_plant.dart';
-
-class EncyclopediaItem extends StatelessWidget {
+class EncyclopediaItem extends StatefulWidget {
   const EncyclopediaItem({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final encyclopediaController = Get.put(EncyclopediaController());
+  State<EncyclopediaItem> createState() => _EncyclopediaItemState();
+}
 
+class _EncyclopediaItemState extends State<EncyclopediaItem> {
+  final encyclopediaController = Get.put(EncyclopediaController());
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent == _scrollController.position.pixels) {
+        encyclopediaController.fetchMorePlants();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFEDFFF1),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          encyclopediaController.fetchAllPlants();
+          encyclopediaController.fetchInitialPlants();
         },
         backgroundColor: const Color(0xFF046526),
-        tooltip: 'Search Plant',
+        tooltip: 'Refresh Plants',
         child: const Icon(Icons.refresh, color: Colors.white, size: 28),
       ),
       body: Obx(() {
@@ -32,6 +53,7 @@ class EncyclopediaItem extends StatelessWidget {
         }
 
         return GridView.builder(
+          controller: _scrollController,
           padding: const EdgeInsets.all(16.0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -39,13 +61,15 @@ class EncyclopediaItem extends StatelessWidget {
             mainAxisSpacing: 16.0,
             childAspectRatio: 0.75,
           ),
-          itemCount: encyclopediaController.allPlants.length,
+          itemCount: encyclopediaController.allPlants.length + (encyclopediaController.hasMorePlants.value ? 1 : 0),
           itemBuilder: (context, index) {
-            final plant = encyclopediaController.allPlants[index];
+            if (index == encyclopediaController.allPlants.length) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
+            final plant = encyclopediaController.allPlants[index];
             return InkWell(
               onTap: () {
-                // Use Get.bottomSheet to show the details.
                 Get.bottomSheet(
                   _buildPlantDetailsSheet(plant),
                   backgroundColor: Colors.white,
@@ -54,7 +78,6 @@ class EncyclopediaItem extends StatelessWidget {
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                 );
-                print("Tapped on plant ID: ${plant.id}");
               },
               child: Card(
                 color: const Color(0xFFFCFDFC),
@@ -68,7 +91,7 @@ class EncyclopediaItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Image.network(
-                        plant.imgUrl ?? 'https://via.placeholder.com/150', // A better placeholder
+                        plant.imgUrl ?? 'https://via.placeholder.com/150',
                         fit: BoxFit.cover,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
@@ -99,7 +122,6 @@ class EncyclopediaItem extends StatelessWidget {
     );
   }
 
-  // --- WIDGET FOR THE BOTTOM SHEET CONTENT ---
   Widget _buildPlantDetailsSheet(SpeciesModel species) {
     return Container(
       height: Get.height * 0.525,
@@ -125,7 +147,7 @@ class EncyclopediaItem extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildDetailRow(Icons.forest_outlined, 'Genus', species.genus ?? 'N/A'),
                 const SizedBox(height: 16),
-                _buildDetailRow(Icons.calendar_today_outlined, 'Year', species.year.toString() ?? 'N/A'),
+                _buildDetailRow(Icons.calendar_today_outlined, 'Year', species.year.toString()),
                 const SizedBox(height: 16),
                 _buildDetailRow(Icons.description_outlined, 'Bibliography', species.bibliography ?? 'N/A'),
                 const SizedBox(height: 16),
@@ -133,7 +155,6 @@ class EncyclopediaItem extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      print("Add Plant ID: ${species.id} to library");
                       Get.back();
                       Get.to(() => const AddPlantScreen(), arguments: species);
                     },
@@ -175,7 +196,6 @@ class EncyclopediaItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              // const SizedBox(height: 4),
               Text(value, style: TextStyle(fontSize: 16, color: Colors.grey[800])),
             ],
           ),
