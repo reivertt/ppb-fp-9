@@ -1,56 +1,20 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ppb_fp_9/controller/authentication_controller.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
-}
+  Widget build(BuildContext context) {
+    final authController = Get.put(AuthenticationController());
+    // final authController = Get.find<AuthenticationController>();
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _usernameController = TextEditingController();
 
-  bool _isLoading = false;
-  String _errorCode = "";
-
-  void navigateLogin() {
-    if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, 'login');
-  }
-
-  void navigateHome() {
-    if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, 'home');
-  }
-
-  void register() async {
-    setState(() {
-      _isLoading = true;
-      _errorCode = "";
-    });
-
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      navigateLogin();
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorCode = e.code;
-      });
+    void navigateLogin() {
+      Get.offAllNamed('login');
     }
 
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: const Color(0xFFDEFFE7),
       body: Padding(
@@ -68,7 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 48),
               TextField(
-                controller: _usernameController,
+                controller: authController.usernameController,
                 cursorColor: Color(0xFF046526),
                 style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
@@ -87,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 12,),
               TextField(
-                controller: _emailController,
+                controller: authController.emailController,
                 cursorColor: Color(0xFF046526),
                 style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
@@ -106,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 12,),
               TextField(
-                controller: _passwordController,
+                controller: authController.passwordController,
                 cursorColor: Color(0xFF046526),
                 style: TextStyle(color: Colors.black),
                 obscureText: true,
@@ -125,31 +89,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              _errorCode != ""
-                  ? Column(
-                  children: [Text(_errorCode), const SizedBox(height: 12)])
-                  : const SizedBox(height: 0),
-              OutlinedButton(
-                onPressed: register,
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.all(16),
-                  backgroundColor: Color(0xFF046526),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6), // Radius sudut
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white, )
-                    : const Text('Register', style: TextStyle(fontSize: 16),),
-              ),
+              Obx(() {
+                return authController.errorCode.value.isNotEmpty
+                    ? Column(
+                  children: [
+                    Text(
+                      authController.errorCode.value,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 12)
+                  ],
+                ) : SizedBox.shrink();
+              }),
+              Obx(() {
+                return OutlinedButton(
+                    onPressed: authController.isLoading.value ? null : () => authController.register(),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(16),
+                      backgroundColor: Color(0xFF046526),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: authController.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Register', style: TextStyle(fontSize: 16))
+                );
+              }),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text('Already have an account?'),
                   TextButton(
                     onPressed: navigateLogin,
-                    child: const Text('Login now', style: TextStyle(color: Color(0xFF046526)),),
+                    child: const Text('Login now', style: TextStyle(color: Color(0xFF046526))),
                   )
                 ],
               )

@@ -25,9 +25,16 @@ class PlantsController extends GetxController {
     try {
       isLoading.value = true;
 
+      print("DEBUG plant-repo *Masuk fetchAllPlants()*");
+
       final plants = await plantsRepository.fetchPlants();
 
+      print("DEBUG plant-repo plants: ${plants}");
+
+
       allPlants.assignAll(plants);
+
+      print("DEBUG plant-repo *keluar fetchAllPlants()*");
     } catch (e) {
       Get.snackbar(
         'Oh Snap!',

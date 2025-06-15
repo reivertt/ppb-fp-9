@@ -1,55 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:ppb_fp_9/controller/authentication_controller.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
+  Widget build(BuildContext context) {
+    final authController = Get.put(AuthenticationController());
+    // final authController = Get.find<AuthenticationController>();
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool _isLoading = false;
-  String _errorCode = "";
-
-  void navigateRegister() {
-    if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, 'register');
-  }
-
-  void navigateHome() {
-    if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, 'home');
-  }
-
-  void signIn() async {
-    setState(() {
-      _isLoading = true;
-      _errorCode = "";
-    });
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      navigateHome();
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorCode = e.code;
-      });
+    void navigateRegister() {
+      Get.offAllNamed('register');
     }
 
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: const Color(0xFFDEFFE7),
       body: Padding(
@@ -67,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 48),
               TextField(
-                controller: _emailController,
+                controller: authController.emailController,
                 cursorColor: Color(0xFF046526),
                 style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
@@ -86,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12,),
               TextField(
-                controller: _passwordController,
+                controller: authController.passwordController,
                 cursorColor: Color(0xFF046526),
                 style: TextStyle(color: Colors.black),
                 obscureText: true,
@@ -105,24 +69,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              _errorCode != ""
+              Obx(() {
+                return authController.errorCode.value.isNotEmpty
                   ? Column(
-                  children: [Text(_errorCode), const SizedBox(height: 12)])
-                  : const SizedBox(height: 0),
-              OutlinedButton(
-                onPressed: signIn,
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.all(16),
-                  backgroundColor: Color(0xFF046526),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6), // Radius sudut
+                    children: [
+                      Text(authController.errorCode.value, style: TextStyle(color: Colors.red)),
+                      const SizedBox(height: 12)
+                    ],
+                  ) : const SizedBox.shrink();
+              }),
+              Obx(() {
+                return OutlinedButton(
+                  onPressed: authController.isLoading.value ? null : () => authController.signIn(),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.all(16),
+                    backgroundColor: Color(0xFF046526),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)
+                    ),
                   ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white, )
-                    : const Text('Login', style: TextStyle(fontSize: 16),),
-              ),
+                  child: authController.isLoading.value
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Login', style: TextStyle(fontSize: 16)),
+                );
+              }),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
