@@ -7,11 +7,11 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.put(AuthenticationController());
-    // final authController = Get.find<AuthenticationController>();
+    // final authController = Get.put(AuthenticationController());
+    final authController = Get.find<AuthenticationController>();
 
     void navigateRegister() {
-      Get.offAllNamed('register');
+      Get.toNamed('/register');
     }
 
     return Scaffold(

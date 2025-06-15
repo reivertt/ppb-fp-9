@@ -5,7 +5,7 @@ import 'package:ppb_fp_9/repository/authentication_repository.dart';
 class AuthenticationController extends GetxController {
   static AuthenticationController get instance => Get.find();
 
-  final authRepository = Get.put(AuthenticationRepository());
+  final authRepository = Get.find<AuthenticationRepository>();
 
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
@@ -29,7 +29,7 @@ class AuthenticationController extends GetxController {
       print("cont-back");
       if (userCredential.user != null) {
         await authRepository.saveUserData(userCredential.user!, usernameController.text.trim());
-        Get.offAllNamed('login');
+        // Get.offAllNamed('login');
       }
       print("cont-navigate");
     } catch (e) {
@@ -53,7 +53,7 @@ class AuthenticationController extends GetxController {
         passwordController.text.trim(),
       );
       print("cont-finished");
-      Get.offAllNamed('home');
+      // Get.offAllNamed('home');
       print("cont-navigate");
     } catch (e) {
       print("cont-err");
