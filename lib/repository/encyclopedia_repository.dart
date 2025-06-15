@@ -34,27 +34,4 @@ class EncyclopediaRepository extends GetxController {
       throw Exception('An error occurred while fetching plants: ${e.toString()}');
     }
   }
-
-  Future<SpeciesModel> getSinglePlant({required int plantId}) async {
-    try {
-      final uri = Uri.parse('$_baseUrl/api/v1/plants/$plantId?token=$_apiKey');
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-
-        if (data.containsKey('data')) {
-          final dynamic speciesJson = data['data'];
-          return SpeciesModel.fromJson(speciesJson);
-        } else {
-          throw Exception('API response did not contain a "data" key.');
-        }
-
-      } else {
-        throw Exception('Failed to load plant details. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('An error occurred while fetching plant details: ${e.toString()}');
-    }
-  }
 }

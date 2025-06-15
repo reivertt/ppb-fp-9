@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ppb_fp_9/controller/encyclopedia_controller.dart'; // <-- Use the new EncyclopediaController
+import 'package:ppb_fp_9/controller/encyclopedia_controller.dart';
+import 'package:ppb_fp_9/models/species_model.dart';
 
 class EncyclopediaItem extends StatelessWidget {
   const EncyclopediaItem({super.key});
@@ -17,7 +18,7 @@ class EncyclopediaItem extends StatelessWidget {
         },
         backgroundColor: const Color(0xFF046526),
         tooltip: 'Search Plant',
-        child: const Icon(Icons.arrow_forward, color: Colors.white, size: 28),
+        child: const Icon(Icons.refresh, color: Colors.white, size: 28),
       ),
       body: Obx(() {
         if (encyclopediaController.isLoading.value && encyclopediaController.allPlants.isEmpty) {
@@ -25,12 +26,11 @@ class EncyclopediaItem extends StatelessWidget {
         }
 
         if (encyclopediaController.allPlants.isEmpty) {
-          return const Center(child: Text('No plants found.'));
+          return const Center(child: Text('No plants found. Press the button to fetch them!'));
         }
 
         return GridView.builder(
           padding: const EdgeInsets.all(16.0),
-          // --- Grid Configuration ---
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 16.0,
@@ -43,12 +43,19 @@ class EncyclopediaItem extends StatelessWidget {
 
             return InkWell(
               onTap: () {
-
-                // Get.to(() => PlantDetail(plant: plant));
+                // Use Get.bottomSheet to show the details.
+                Get.bottomSheet(
+                  _buildPlantDetailsSheet(plant),
+                  backgroundColor: Colors.white,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                );
                 print("Tapped on plant ID: ${plant.id}");
               },
               child: Card(
-                color: Color(0xFFFCFDFC),
+                color: const Color(0xFFFCFDFC),
                 clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -59,7 +66,7 @@ class EncyclopediaItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Image.network(
-                        plant.imgUrl ?? 'https://images-cdn.ubuy.co.id/6369ceadde00db205016ea52-peashooter-from-plants-vs-zombies-vinyl.jpg',
+                        plant.imgUrl ?? 'https://via.placeholder.com/150', // A better placeholder
                         fit: BoxFit.cover,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
@@ -87,6 +94,94 @@ class EncyclopediaItem extends StatelessWidget {
           },
         );
       }),
+    );
+  }
+
+  // --- WIDGET FOR THE BOTTOM SHEET CONTENT ---
+  Widget _buildPlantDetailsSheet(SpeciesModel species) {
+    return Container(
+      height: Get.height * 0.525,
+      padding: const EdgeInsets.all(24.0),
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  species.commonName ?? 'No Common Name',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF046526)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  species.scientificName,
+                  style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+                const Divider(height: 32, thickness: 1),
+
+                _buildDetailRow(Icons.grass, 'Family', species.family ?? 'N/A'),
+                const SizedBox(height: 16),
+                _buildDetailRow(Icons.forest_outlined, 'Genus', species.genus ?? 'N/A'),
+                const SizedBox(height: 16),
+                _buildDetailRow(Icons.calendar_today_outlined, 'Year', species.year.toString() ?? 'N/A'),
+                const SizedBox(height: 16),
+                _buildDetailRow(Icons.description_outlined, 'Bibliography', species.bibliography ?? 'N/A'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      print("Add Plant ID: ${species.id} to library");
+                      Get.snackbar(
+                        'Feature Coming Soon',
+                        'Ability to add plants to your library is under development!',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    label: const Text('Add Plant to Library', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF046526),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey),
+              iconSize: 32.0,
+              splashRadius: 24.0,
+              onPressed: () => Get.back(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String title, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, color: Colors.grey[600], size: 30),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              // const SizedBox(height: 4),
+              Text(value, style: TextStyle(fontSize: 16, color: Colors.grey[800])),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
