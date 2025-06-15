@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:ppb_fp_9/screens/home.dart';
 import 'package:ppb_fp_9/screens/login.dart';
 import 'package:ppb_fp_9/screens/register.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(initialRoute: 'login', routes: {
+    return GetMaterialApp(initialRoute: 'login', routes: {
       'home': (context) => const HomeScreen(),
       'login': (context) => const LoginScreen(),
       'register': (context) => const RegisterScreen(),
