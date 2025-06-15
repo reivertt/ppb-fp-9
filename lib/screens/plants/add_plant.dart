@@ -31,10 +31,14 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   void initState(){
     super.initState();
     if (isEditMode) {
+      print("DEBUG add-plant isEditMode");
       _commonNameController.text = widget.plant!.commonName;
       _customNameController.text = widget.plant!.customName ?? '';
       _selectedPlantedDate = widget.plant!.plantedDate?.toDate();
-    } else if (Get.arguments != null && Get.arguments is SpeciesModel) {
+      _imageUrl = widget.plant!.imgUrl;
+    }
+    else if (Get.arguments != null && Get.arguments is SpeciesModel) {
+      print("DEBUG add-plant arguments called");
       final species = Get.arguments as SpeciesModel;
       _commonNameController.text = species.commonName ?? '';
       _imageUrl = species.imgUrl;
@@ -113,6 +117,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           userId: user.uid,
           commonName: _commonNameController.text,
           customName: _customNameController.text.isNotEmpty ? _customNameController.text : null,
+          imgUrl: _imageUrl,
           plantedDate: Timestamp.fromDate(_selectedPlantedDate!),
           createdAt: now,
           updatedAt: now,

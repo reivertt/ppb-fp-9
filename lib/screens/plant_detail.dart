@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/screens/plants/add_plant.dart';
-
-import '../controller/plants_controller.dart';
+import 'package:ppb_fp_9/controller/plants_controller.dart';
 
 class PlantDetail extends StatelessWidget {
   final String plantId;
@@ -14,39 +13,40 @@ class PlantDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<PlantsController>();
 
-    void showDeleteConfirmationDialog() {
+    void showDeleteConfirmationDialog(PlantsModel plant) {
       Get.defaultDialog(
         title: "Delete Plant",
-        middleText: "Are you sure you want to delete '${controller.allPlants.firstWhere((p) => p.id == plantId).commonName}'? This action cannot be undone.",
+        middleText: "Are you sure you want to delete '${plant.commonName}'? This action cannot be undone.",
         textConfirm: "Delete",
         textCancel: "Cancel",
         confirmTextColor: Colors.white,
         onConfirm: () {
-          controller.deletePlant(plantId); // Call controller to delete
+          controller.deletePlant(plantId);
+          Get.back();
         },
       );
     }
 
-    return Obx(
-      () {
-        final Rx<PlantsModel>? plant = controller.allPlants.firstWhere((p) => p.id == plantId).isNull ? null : controller.allPlants.firstWhere((p) => p.id == plantId).obs;
+    return Obx(() {
+      final plant = controller.allPlants.firstWhereOrNull((p) => p.id == plantId);
+      // final Rx<PlantsModel>? plant = controller.allPlants.firstWhere((p) => p.id == plantId).isNull ? null : controller.allPlants.firstWhere((p) => p.id == plantId).obs;
         
         if (plant == null) {
           return Scaffold(
             backgroundColor: const Color(0xFFEDFFF1),
             appBar: AppBar(
-              title: Text(plant!.value.commonName),
+              title: Text("Loading plant..."),
               backgroundColor: const Color(0xFF046526),
               foregroundColor: Colors.white,
             ),
-            body: Center(child: Text("No plant data found."),)
+            body: Center(child: Text("Looking for your plant..."))
           );
         }
         
         return Scaffold(
           backgroundColor: const Color(0xFFEDFFF1),
           appBar: AppBar(
-            title: Text(plant!.value.commonName),
+            title: Text(plant.commonName),
             backgroundColor: const Color(0xFF046526),
             foregroundColor: Colors.white,
           ),
@@ -56,7 +56,7 @@ class PlantDetail extends StatelessWidget {
               children: [
                 // --- PLANT IMAGE ---
                 Image.network(
-                  plant!.value.imgUrl ??
+                  plant.imgUrl ??
                       "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png",
                   height: 250,
                   width: double.infinity,
@@ -82,17 +82,17 @@ class PlantDetail extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        plant.value.commonName,
+                        plant.commonName,
                         style: const TextStyle(fontWeight: FontWeight.bold,
                             fontSize: 24,
                             color: Color(0xFF046526)),
                       ),
-                      if (plant.value.customName != null &&
-                          plant.value.customName!.isNotEmpty)
+                      if (plant.customName != null &&
+                          plant.customName!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Text(
-                            '"${plant.value.customName!}"', // Nickname
+                            '"${plant.customName!}"', // Nickname
                             style: const TextStyle(fontSize: 18,
                                 fontStyle: FontStyle.italic,
                                 color: Colors.black54),
@@ -105,17 +105,15 @@ class PlantDetail extends StatelessWidget {
                       InfoTile(
                         icon: Icons.calendar_today,
                         label: 'Planted On',
-                        value: plant.value.plantedDate != null
-                            ? DateFormat.yMMMMd().format(plant.value
-                            .plantedDate!.toDate())
+                        value: plant.plantedDate != null
+                            ? DateFormat.yMMMMd().format(plant.plantedDate!.toDate())
                             : 'No date set',
                       ),
                       InfoTile(
                         icon: Icons.access_time,
                         label: 'Entry Created',
-                        value: plant.value.createdAt != null
-                            ? DateFormat.yMMMMd().format(plant!.value.createdAt!
-                            .toDate())
+                        value: plant.createdAt != null
+                            ? DateFormat.yMMMMd().format(plant.createdAt!.toDate())
                             : 'N/A',
                       ),
 
@@ -129,9 +127,7 @@ class PlantDetail extends StatelessWidget {
                               icon: const Icon(Icons.edit),
                               label: const Text('Edit'),
                               onPressed: () {
-                                // Navigate to the Add/Edit screen, passing the existing plant data
-                                Get.to(() =>
-                                    AddPlantScreen(plant: plant!.value));
+                                Get.to(() => AddPlantScreen(plant: plant));
                               },
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF046526),
@@ -147,7 +143,7 @@ class PlantDetail extends StatelessWidget {
                             child: ElevatedButton.icon(
                               icon: const Icon(Icons.delete_outline),
                               label: const Text('Delete'),
-                              onPressed: showDeleteConfirmationDialog,
+                              onPressed: () => showDeleteConfirmationDialog(plant),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red.shade700,
                                 foregroundColor: Colors.white,
