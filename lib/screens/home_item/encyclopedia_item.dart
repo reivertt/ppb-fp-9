@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:ppb_fp_9/controller/encyclopedia_controller.dart';
 import 'package:ppb_fp_9/models/species_model.dart';
 
+import '../plants/add_plant.dart';
+
 class EncyclopediaItem extends StatelessWidget {
   const EncyclopediaItem({super.key});
 
@@ -132,11 +134,8 @@ class EncyclopediaItem extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       print("Add Plant ID: ${species.id} to library");
-                      Get.snackbar(
-                        'Feature Coming Soon',
-                        'Ability to add plants to your library is under development!',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      Get.back();
+                      Get.to(() => const AddPlantScreen(), arguments: species);
                     },
                     icon: const Icon(Icons.add, color: Colors.white),
                     label: const Text('Add Plant to Library', style: TextStyle(color: Colors.white, fontSize: 16)),

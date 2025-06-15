@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
 
 import 'package:ppb_fp_9/models/plants_model.dart';
+import 'package:ppb_fp_9/models/species_model.dart';
 
 class AddPlantScreen extends StatefulWidget {
   const AddPlantScreen({super.key});
@@ -21,6 +22,17 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
 
   DateTime? _selectedPlantedDate;
   bool _isSaving = false;
+  String? _imageUrl;
+
+  @override
+  void initState(){
+    super.initState();
+    if (Get.arguments != null && Get.arguments is SpeciesModel) {
+      final species = Get.arguments as SpeciesModel;
+      _commonNameController.text = species.commonName ?? '';
+      _imageUrl = species.imgUrl;
+    }
+  }
 
   @override
   void dispose() {
@@ -72,6 +84,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
         userId: user.uid,
         commonName: _commonNameController.text,
         customName: _customNameController.text.isNotEmpty ? _customNameController.text : null,
+        imgUrl: _imageUrl,
         plantedDate: Timestamp.fromDate(_selectedPlantedDate!),
         createdAt: now,
         updatedAt: now,
