@@ -40,6 +40,8 @@ dependencies:
   get: ^4.6.5
   iconsax: ^0.0.8
   intl: ^0.20.2
+  http: ^1.4.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_launcher_icons:
