@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:ppb_fp_9/screens/home_item/encyclopedia_item.dart';
 import 'package:ppb_fp_9/screens/home_item/home_item.dart';
 import 'package:ppb_fp_9/screens/home_item/plants_item.dart';
@@ -6,84 +7,68 @@ import 'package:ppb_fp_9/screens/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatefulWidget {
+// Convert to a StatelessWidget
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-
-  void logout(context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacementNamed(context, 'login');
-  }
-
-  // Daftar tampilan konten per tab
-  List<Widget> _pages(User? user) => [
-    HomeItem(user: user, onLogout: () => logout(context)),
-    PlantsItem(),
-    SchedulesItem(),
-    EncyclopediaItem(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Instantiate the controller. Get.put() handles its lifecycle.
+    final navController = Get.put(NavigationController());
+
+    void logout() async {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacementNamed(context, 'login');
+    }
+
+    List<Widget> pages(User? user) => [
+      HomeItem(user: user, onLogout: logout),
+      const PlantsItem(),
+      const SchedulesItem(),
+      const EncyclopediaItem(),
+    ];
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        final user = snapshot.data;
-        final pages = _pages(user);
-
-        // Safety check untuk memastikan index tidak keluar batas
-        if (_selectedIndex >= pages.length) {
-          _selectedIndex = 0;
-        }
         if (snapshot.hasData) {
-          return Scaffold(
-            backgroundColor: Color(0xFFEDFFF1),
+          final user = snapshot.data;
+          final screenPages = pages(user);
+
+          // Safety check untuk memastikan index tidak keluar batas
+          if (navController.selectedIndex >= screenPages.length) {
+            navController.selectedIndex.value = 0;
+          }
+
+          return Obx(() => Scaffold(
+            backgroundColor: const Color(0xFFEDFFF1),
             appBar: AppBar(
-              backgroundColor: Color(0xFF046526),
+              backgroundColor: const Color(0xFF046526),
               title: Row(
                 children: [
                   Image.asset(
                     'assets/appbar-logo.png',
                     height: 24,
                   ),
-                  SizedBox(width: 12,),
-                  Text(
+                  const SizedBox(width: 12),
+                  const Text(
                     'Leafy',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
-                        fontWeight: FontWeight.bold
-                    ),
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
-              )
+              ),
             ),
-            body: _pages(snapshot.data)[_selectedIndex], // Ganti berdasarkan tab
+            body: screenPages[navController.selectedIndex.value],
             bottomNavigationBar: BottomNavigationBar(
-              // backgroundColor: Color(0xFFFCFDFC),
               backgroundColor: const Color(0xFF046526),
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
+              currentIndex: navController.selectedIndex.value,
+              onTap: navController.changeScreen,
               type: BottomNavigationBarType.fixed,
-
-              // Warna ikon & label saat aktif & tidak aktif
-              // selectedItemColor: const Color(0xFF046526),
               selectedItemColor: Colors.white,
               unselectedItemColor: Colors.white.withAlpha(150),
-
-              // Style teks
               selectedLabelStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -92,11 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.normal,
                 fontSize: 12,
               ),
-
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home,),
+                  activeIcon: Icon(Icons.home),
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
@@ -116,11 +100,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          );
+          ));
         } else {
           return const LoginScreen();
         }
       },
     );
+  }
+}
+
+class NavigationController extends GetxController {
+  // 1. Make selectedIndex observable by adding .obs
+  //    This creates an RxInt (Reactive Integer).
+  final RxInt selectedIndex = 0.obs;
+
+  // 2. The changeScreen method now updates the .value of the observable
+  void changeScreen(int index) {
+    selectedIndex.value = index;
   }
 }
