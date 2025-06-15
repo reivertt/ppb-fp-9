@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -71,4 +72,71 @@ class PlantsController extends GetxController {
       );
     }
   }
+
+  Future<void> deletePlant(String plantId) async {
+    try {
+      final deletedPlant = allPlants.firstWhere((p) => p.id == plantId);
+
+      if (FirebaseAuth.instance.currentUser?.uid != deletedPlant.userId) {
+        Get.back();
+        Get.snackbar('Error', 'Failed to delete plant: Unauthorized access!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+        return;
+      }
+
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+
+      await plantsRepository.deletePlant(deletedPlant.id!);
+
+      allPlants.removeWhere((plant) => plant.id == deletedPlant.id);
+
+      Get.back();
+      Get.back();
+      Get.back();
+      Get.back();
+
+      Get.snackbar('Success', 'Plant was successfully deleted.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white);
+
+    } catch (e) {
+      Get.back();
+      Get.snackbar('Error', 'Failed to delete plant: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
+  }
+
+  Future<void> updatePlant(PlantsModel updatedPlant) async {
+    try {
+      if (FirebaseAuth.instance.currentUser?.uid != updatedPlant.userId) {
+        Get.back();
+        Get.snackbar('Error', 'Failed to update plant: Unauthorized access!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+        return;
+      }
+
+      await plantsRepository.updatePlant(updatedPlant);
+
+      int index = allPlants.indexWhere((p) => p.id == updatedPlant.id);
+      if (index != -1) {
+        allPlants[index] = updatedPlant;
+      }
+
+      await fetchAllPlants();
+
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update plant: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
+  }
+
 }

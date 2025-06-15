@@ -1,224 +1,204 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:ppb_fp_9/services/firestore.dart';
+import 'package:ppb_fp_9/models/plants_model.dart';
+import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 
-class PlantDetail extends StatefulWidget {
-  final String plantName;
-  final String docID;
+import '../controller/plants_controller.dart';
 
-  const PlantDetail({super.key, required this.plantName, required this.docID});
-
-  @override
-  State<PlantDetail> createState() => _PlantDetailState();
-}
-
-class _PlantDetailState extends State<PlantDetail> {
-  final FireStoreService _fireStoreService = FireStoreService();
-  final TextEditingController _logTitleController = TextEditingController();
-  final TextEditingController _logDescriptionController = TextEditingController();
-  DateTime? _selectedDate;
-
-  // Dialog box untuk menambah & mengupdate logs
-  void openLogBox({DocumentSnapshot? doc}) {
-    String? docLogID = doc?.id;
-
-    // Jika mode update, isi field dengan data yang ada. Jika tidak, kosongkan.
-    if (doc != null) {
-      _logTitleController.text = doc['title'];
-      _logDescriptionController.text = doc['desc'];
-      _selectedDate = (doc['plantdate'] as Timestamp).toDate();
-    } else {
-      _logTitleController.clear();
-      _logDescriptionController.clear();
-      _selectedDate = null;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setStateInDialog) {
-          return AlertDialog(
-            title: Text(doc == null ? "Add log to this plant" : "Update log"),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _logTitleController,
-                    autofocus: true,
-                    decoration: InputDecoration(hintText: "Write title for this log..."),
-                  ),
-                  SizedBox(height: 8),
-                  TextField(
-                    controller: _logDescriptionController,
-                    decoration: InputDecoration(hintText: "Write description for this log..."),
-                  ),
-                  SizedBox(height: 16),
-                  // date picker
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _selectedDate == null
-                              ? 'Choose Log Date'
-                              : DateFormat('dd MMMM yyyy').format(_selectedDate!),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.calendar_today),
-                        onPressed: () async {
-                          final DateTime? picked = await showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate ?? DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2101),
-                          );
-                          if (picked != null && picked != _selectedDate) {
-                            setStateInDialog(() {
-                              _selectedDate = picked;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  if (_logTitleController.text.isNotEmpty && _selectedDate != null) {
-                    Timestamp logTimestamp = Timestamp.fromDate(_selectedDate!);
-
-                    if (docLogID == null) {
-                      // CREATE
-                      _fireStoreService.addLogToPlant(
-                        widget.docID,
-                        _logTitleController.text,
-                        _logDescriptionController.text,
-                        logTimestamp,
-                      );
-                    } else {
-                      // UPDATE
-                      _fireStoreService.updateLog(
-                        widget.docID,
-                        docLogID,
-                        _logTitleController.text,
-                        _logDescriptionController.text,
-                        logTimestamp,
-                      );
-                    }
-                    Navigator.pop(context);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Title and Plant Date cannot be empty!')),
-                    );
-                  }
-                },
-                child: Text("Save"),
-              )
-            ],
-          );
-        },
-      ),
-    );
-  }
+class PlantDetail extends StatelessWidget {
+  final String plantId;
+  const PlantDetail({super.key, required this.plantId});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${widget.plantName} Logs",
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Color(0xFF046526),
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.lightGreen,
-        onPressed: () => openLogBox(),
-        child: Icon(Icons.note_add, color: Colors.white),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _fireStoreService.getLogsStream(widget.docID),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List logsList = snapshot.data!.docs;
-            if (logsList.isEmpty) {
-              return Center(child: Text("No logs for this plant yet.."));
-            }
-            return ListView.builder(
-              itemCount: logsList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot document = logsList[index];
-                String docLogID = document.id; // GET LOG ID
-                Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-                String logTitleText = data['title'];
-                String logDescriptionText = data['desc'];
-                Timestamp timestamp = data['plantdate'];
-                DateTime dateTime = timestamp.toDate();
+    final controller = Get.find<PlantsController>();
 
-                return ListTile(
-                  title: Text(logTitleText),
-                  subtitle: Column(
+    void showDeleteConfirmationDialog() {
+      Get.defaultDialog(
+        title: "Delete Plant",
+        middleText: "Are you sure you want to delete '${controller.allPlants.firstWhere((p) => p.id == plantId).commonName}'? This action cannot be undone.",
+        textConfirm: "Delete",
+        textCancel: "Cancel",
+        confirmTextColor: Colors.white,
+        onConfirm: () {
+          controller.deletePlant(plantId); // Call controller to delete
+        },
+      );
+    }
+
+    return Obx(
+      () {
+        final Rx<PlantsModel>? plant = controller.allPlants.firstWhere((p) => p.id == plantId).isNull ? null : controller.allPlants.firstWhere((p) => p.id == plantId).obs;
+        
+        if (plant == null) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFEDFFF1),
+            appBar: AppBar(
+              title: Text(plant!.value.commonName),
+              backgroundColor: const Color(0xFF046526),
+              foregroundColor: Colors.white,
+            ),
+            body: Center(child: Text("No plant data found."),)
+          );
+        }
+        
+        return Scaffold(
+          backgroundColor: const Color(0xFFEDFFF1),
+          appBar: AppBar(
+            title: Text(plant!.value.commonName),
+            backgroundColor: const Color(0xFF046526),
+            foregroundColor: Colors.white,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- PLANT IMAGE ---
+                Image.network(
+                  plant!.value.imgUrl ??
+                      "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png",
+                  height: 250,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const SizedBox(
+                        height: 250,
+                        child: Center(child: CircularProgressIndicator()));
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox(
+                        height: 250,
+                        child: Center(child: Icon(
+                            Icons.broken_image, size: 60, color: Colors.grey)));
+                  },
+                ),
+
+                // --- DETAILS SECTION ---
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(logDescriptionText),
-                      SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            DateFormat('EEEE, dd MMMM yyyy').format(dateTime),
-                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      Text(
+                        plant.value.commonName,
+                        style: const TextStyle(fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            color: Color(0xFF046526)),
+                      ),
+                      if (plant.value.customName != null &&
+                          plant.value.customName!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Text(
+                            '"${plant.value.customName!}"', // Nickname
+                            style: const TextStyle(fontSize: 18,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.black54),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // UPDATE BUTTON
-                              IconButton(
-                                onPressed: () => openLogBox(doc: document),
-                                icon: Icon(Icons.edit),
+                        ),
+
+                      const SizedBox(height: 24),
+
+                      // --- INFO TILES ---
+                      InfoTile(
+                        icon: Icons.calendar_today,
+                        label: 'Planted On',
+                        value: plant.value.plantedDate != null
+                            ? DateFormat.yMMMMd().format(plant.value
+                            .plantedDate!.toDate())
+                            : 'No date set',
+                      ),
+                      InfoTile(
+                        icon: Icons.access_time,
+                        label: 'Entry Created',
+                        value: plant.value.createdAt != null
+                            ? DateFormat.yMMMMd().format(plant!.value.createdAt!
+                            .toDate())
+                            : 'N/A',
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // --- ACTION BUTTONS ---
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.edit),
+                              label: const Text('Edit'),
+                              onPressed: () {
+                                // Navigate to the Add/Edit screen, passing the existing plant data
+                                Get.to(() =>
+                                    AddPlantScreen(plant: plant!.value));
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF046526),
+                                side: const BorderSide(
+                                    color: Color(0xFF046526)),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12),
                               ),
-                              // DELETE BUTTON
-                              IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text("Delete Log"),
-                                      content: Text("Are you sure you want to delete this log?"),
-                                      actions: [
-                                        TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancel")),
-                                        TextButton(
-                                          onPressed: () {
-                                            _fireStoreService.deleteLog(widget.docID, docLogID);
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text("Delete"),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                icon: Icon(Icons.delete),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.delete_outline),
+                              label: const Text('Delete'),
+                              onPressed: showDeleteConfirmationDialog,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade700,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12),
                               ),
-                            ],
-                          )
+                            ),
+                          ),
                         ],
                       ),
-                      Divider(height: 2, color: Colors.grey[400]),
                     ],
                   ),
-                );
-              },
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+}
+
+// Helper widget for displaying information neatly
+class InfoTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const InfoTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey.shade600, size: 20),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: Colors.grey.shade700)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ],
       ),
     );
   }
