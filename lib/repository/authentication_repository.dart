@@ -24,7 +24,10 @@ class AuthenticationRepository extends GetxController {
   Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
     try {
       print("repo-try login");
-      return await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final login = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      print("repo-done login");
+      print("repo login returns: ${login}");
+      return login;
     } on FirebaseAuthException catch (e) {
       print("repo-firebase error");
       throw Exception(e.code);
