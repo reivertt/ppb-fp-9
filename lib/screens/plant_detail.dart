@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
+import 'package:ppb_fp_9/screens/plants/plant_logs.dart';
 
 class PlantDetail extends StatelessWidget {
   final String plantId;
@@ -28,8 +29,8 @@ class PlantDetail extends StatelessWidget {
     }
 
     return Obx(() {
-      final plant = controller.allPlants.firstWhereOrNull((p) => p.id == plantId);
-      // final Rx<PlantsModel>? plant = controller.allPlants.firstWhere((p) => p.id == plantId).isNull ? null : controller.allPlants.firstWhere((p) => p.id == plantId).obs;
+        final plant = controller.allPlants.firstWhereOrNull((p) => p.id == plantId);
+        // final Rx<PlantsModel>? plant = controller.allPlants.firstWhere((p) => p.id == plantId).isNull ? null : controller.allPlants.firstWhere((p) => p.id == plantId).obs;
         
         if (plant == null) {
           return Scaffold(
@@ -157,6 +158,16 @@ class PlantDetail extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                Center(
+                    child: ElevatedButton(
+                        onPressed: () => Get.to(() => PlantLogs(plantName: plant.commonName, docID: plant.id!)),
+                        child: Text("Open Plant Logs", style: TextStyle(color: Colors.white),),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF046526),
+                        ),
+                    )
+                )
               ],
             ),
           ),
