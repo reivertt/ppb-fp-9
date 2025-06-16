@@ -1,17 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FireStoreService{
   //get collection reference from firestore
-  final CollectionReference plants = FirebaseFirestore.instance.collection("plants");
+  final CollectionReference plants = FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants");
 
   // create log for specific plant
-  Future<void> addLogToPlant(String docID, String logTitle, String logDescription, Timestamp logDate){
-    return  plants.doc(docID).collection("care-logs").add({
+  Future<void> addLogToPlant(String docID, String logTitle, String logDescription, Timestamp logDate) async{
+
+    print("DEBUG firestore.dart now inside addLogToPlant()");
+
+    final addedplant = await plants.doc(docID).collection("care-logs").add({
       'title': logTitle,
       'desc': logDescription,
       'plantdate': logDate,
       'timestamp': Timestamp.now(),
     });
+
+    print("DEBUG firestore.dart Log successfully added!");
+    print("DEBUG firestore.dart Log saved at path: ${addedplant.path}");
+    print("DEBUG firestore.dart Log ID: ${addedplant.id}");
+
+    return;
   }
 
   // read logs documents for specific plant documents
