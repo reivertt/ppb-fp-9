@@ -38,6 +38,7 @@ class AuthenticationController extends GetxController {
     } finally {
       print("cont-stop load");
       isLoading.value = false;
+      passwordController.text = "";
     }
   }
 
@@ -61,6 +62,7 @@ class AuthenticationController extends GetxController {
     } finally {
       print("cont-stop load");
       isLoading.value = false;
+      passwordController.text = "";
     }
   }
 }
