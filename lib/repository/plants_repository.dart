@@ -25,7 +25,7 @@ class PlantsRepository extends GetxController {
   Future<List<PlantsModel>> fetchPlants() async {
     try {
       final documentSnapshot = await _db
-          // .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
           .collection("plants")
           .get();
       // print("DEBUG plants (snapshot): ${documentSnapshot}");

@@ -57,7 +57,7 @@ class _PlantsItemState extends State<PlantsItem> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Image.network(
-                      plant.imgUrl!,
+                      plant.imgUrl.isNull ? "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png" : plant.imgUrl!,
                       height: 150,
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {

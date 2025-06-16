@@ -216,7 +216,11 @@ class _PlantDetailState extends State<PlantDetail> {
               },
             );
           } else {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+                child: 
+                // Text("No data found.")
+                CircularProgressIndicator()
+            );
           }
         },
       ),
