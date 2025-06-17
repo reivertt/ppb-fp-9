@@ -7,7 +7,6 @@ import 'package:ppb_fp_9/repository/scheduled_tasks_repository.dart';
 class ScheduledTasksController extends GetxController {
   static ScheduledTasksController get instance => Get.find();
   final isLoading = false.obs;
-  final isSaving = false.obs;
 
   final _tasksRepository = Get.put(ScheduledTasksRepository());
 
@@ -40,44 +39,35 @@ class ScheduledTasksController extends GetxController {
 
   Future<void> saveScheduledTask(String plantId, ScheduledTasksModel newTask) async {
     try {
-      isSaving.value = true;
       await _tasksRepository.saveScheduledTask(plantId, newTask);
       await fetchTasksForPlant(plantId);
-      _showSuccessSnackbar('Success', 'Task has been scheduled.');
+      print('Success - Task has been scheduled.');
     } catch (e) {
-      _showErrorSnackbar('Data not saved!', e.toString());
+      print('Data not saved! - e.toString()');
     } finally {
-      isSaving.value = false;
     }
   }
 
   Future<void> updateScheduledTask(String plantId, ScheduledTasksModel updatedTask) async {
     try {
-      isSaving.value = true;
       await _tasksRepository.updateScheduledTask(plantId, updatedTask);
       await fetchTasksForPlant(plantId);
-      _showSuccessSnackbar('Success', 'Task has been updated.');
+      await fetchAllTasksForUser();
+      print('Success - Task has been updated.');
     } catch (e) {
-      _showErrorSnackbar('Failed to update task', e.toString());
+      print('Failed to update task - e.toString()');
     } finally {
-      isSaving.value = false;
     }
   }
 
 
   Future<void> deleteScheduledTask(String plantId, String taskId) async {
     try {
-      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
-
       await _tasksRepository.deleteScheduledTask(plantId, taskId);
       tasksForCurrentPlant.removeWhere((task) => task.id == taskId);
-
-      Get.back();
-      _showSuccessSnackbar('Success', 'Task was successfully deleted.');
-
+      print('Success - Task was successfully deleted.');
     } catch (e) {
-      Get.back();
-      _showErrorSnackbar('Failed to delete task', e.toString());
+      print('Failed to delete task - e.toString()');
     }
   }
 

@@ -92,67 +92,58 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
       );
       return;
     }
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      Get.snackbar('Error', 'No user logged in. Please log in again.');
-      return;
-    }
 
     setState(() { _isSaving = true; });
 
     try {
       final tasksController = Get.find<ScheduledTasksController>();
-      final now = Timestamp.now();
-
+      final task = ScheduledTasksModel(
+        id: widget.task?.id,
+        userId: FirebaseAuth.instance.currentUser!.uid,
+        plantId: widget.plantId,
+        title: _titleController.text,
+        message: _messageController.text,
+        status: widget.task?.status ?? 'pending',
+        scheduledAt: Timestamp.fromDate(_selectedScheduledAt!),
+        createdAt: widget.task?.createdAt ?? Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      );
       if (isEditMode) {
-        final updatedTask = ScheduledTasksModel(
-          id: widget.task!.id,
-          userId: user.uid,
-          plantId: widget.plantId,
-          title: _titleController.text,
-          message: _messageController.text,
-          status: widget.task!.status,
-          scheduledAt: Timestamp.fromDate(_selectedScheduledAt!),
-          createdAt: widget.task!.createdAt,
-          updatedAt: now,
-        );
-        await tasksController.updateScheduledTask(widget.plantId, updatedTask);
-
+        await tasksController.updateScheduledTask(widget.plantId, task);
+        await tasksController.fetchAllTasksForUser();
+        await tasksController.fetchTasksForPlant(widget.plantId);
         await _notificationService.scheduleNotification(
-          id: updatedTask.id!.hashCode,
-          title: 'Reminder: ${updatedTask.title}',
+          id: task.id!.hashCode,
+          title: 'Reminder: ${task.title}',
           body: 'It\'s time for a task for your plant!',
           scheduledTime: _selectedScheduledAt!,
         );
-
         Get.back();
-        Get.snackbar('Success', 'Task was updated!', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green, colorText: Colors.white);
-
+        Get.snackbar(
+            'Success', 'Task was updated!', snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
       } else {
-        final newTask = ScheduledTasksModel(
-          userId: user.uid,
-          plantId: widget.plantId,
-          title: _titleController.text,
-          message: _messageController.text,
-          status: 'pending',
-          scheduledAt: Timestamp.fromDate(_selectedScheduledAt!),
-          createdAt: now,
-          updatedAt: now,
-        );
-
-        final notificationId = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-        await tasksController.saveScheduledTask(widget.plantId, newTask);
-
+        final notificationId = DateTime
+            .now()
+            .millisecondsSinceEpoch
+            .remainder(100000);
+        await tasksController.saveScheduledTask(widget.plantId, task);
+        await tasksController.fetchTasksForPlant(widget.plantId);
         await _notificationService.scheduleNotification(
           id: notificationId,
-          title: 'New Task: ${newTask.title}',
+          title: 'New Task: ${task.title}',
           body: 'A new task has been scheduled for your plant.',
           scheduledTime: _selectedScheduledAt!,
         );
-
         Get.back();
-        Get.snackbar('Success', 'A new task has been scheduled!', snackPosition: SnackPosition.BOTTOM, backgroundColor: const Color(0xFF046526), colorText: Colors.white);
+        Get.snackbar('Success', 'A new task has been scheduled!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF046526),
+            colorText: Colors.white);
       }
+    } catch (e) {
+        rethrow;
     } finally {
       if (mounted) {
         setState(() { _isSaving = false; });
@@ -169,8 +160,8 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
       confirmTextColor: Colors.white,
       // buttonColor: Colors.red.shade700,
       onConfirm: () async {
+        Get.back();
         try {
-          Get.back();
           // Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
           final tasksController = Get.find<ScheduledTasksController>();
           await _notificationService.cancelNotification(widget.task!.id!.hashCode);
@@ -237,7 +228,6 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
                 },
               ),
               const SizedBox(height: 24),
-
               const Text('Message / Notes (Optional)', style: labelStyle),
               const SizedBox(height: 8),
               TextFormField(
@@ -252,7 +242,6 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
-
               const Text('Due Date & Time*', style: labelStyle),
               const SizedBox(height: 8),
               Container(
@@ -283,7 +272,6 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
               ElevatedButton(
                 onPressed: _isSaving ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
