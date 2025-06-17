@@ -2,13 +2,47 @@
 
 A final project as submission for Mobile Programming course
 
-| Name                               | NRP        |
-|------------------------------------|------------|
-| Duevano Fairuz Pandya              | 5025211052 |
-| Muhammad Nabil Akhtar Raya Amoriza | 5025221021 | 
-| Fauzan Dzikri Rabbani              | 5025221311 |
+| Name                               | NRP        |Contribution|
+|------------------------------------|------------|------------|
+| Duevano Fairuz Pandya              | 5025211052 | 25%        |
+| Muhammad Nabil Akhtar Raya Amoriza | 5025221021 | 40%        |
+| Fauzan Dzikri Rabbani              | 5025221311 | 35%        |
 
-## Leafy
+## Team Contribution Details
+### Duevano
+- **UI Template**: login, register, home, plant  
+- **Care Logs for Plant** (CRUD – Firebase)  
+- **App Icon & Splash Screen**  
+- **Use Case Diagram**  
+- **Activity Diagrams**:
+  - User Registration
+  - User Login
+  - Edit Profile
+  - Add Log
+### Nabil
+- **Firebase Authentication**  
+- **Plant Encyclopedia** (via API)  
+- **Schedule Task for Plant** (CRUD – Firebase)  
+- **DDL Firebase**
+- **Component Integration**: `scheduledTasks` & `careLogs`  
+- **Use Case Diagram**  
+- **Activity Diagrams**:
+  - Search Plant Encyclopedia
+  - Add Plant to Encyclopedia
+  - Add Plant
+### Fauzan
+- **Plants CRUD** (Firebase – Repository & Controller)  
+- **DDL** for Firebase Firestore  
+- **Firestore Security Rules**  
+- **Use Case Diagram**  
+- **Activity Diagrams**:
+  - Reset Password
+  - Schedule Task for Plant
+  - Receive Notification
+  - Delete Plant
+
+
+# Leafy
 
 This project is a starting point for a Flutter application.  
 Core Functions:  
