@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ppb_fp_9/services/notification_service.dart';
 import 'package:ppb_fp_9/binding/authentication_binding.dart';
 import 'package:ppb_fp_9/repository/authentication_repository.dart';
 import 'package:ppb_fp_9/screens/home.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  await NotificationService().init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .then((_) => Get.put(AuthenticationRepository()));
   runApp(const MyApp());
