@@ -6,6 +6,7 @@ import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
 import 'package:ppb_fp_9/screens/plants/add_scheduled_task.dart';
+import 'package:ppb_fp_9/screens/plants/plant_logs.dart';
 
 class PlantDetail extends StatefulWidget {
   final String plantId;
