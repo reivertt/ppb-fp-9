@@ -5,9 +5,8 @@ import 'package:ppb_fp_9/controller/scheduled_tasks_controller.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
-import 'package:ppb_fp_9/screens/scheduled_tasks/add_scheduled_task.dart';
+import 'package:ppb_fp_9/screens/plants/add_scheduled_task.dart';
 
-// Converted to a StatefulWidget to manage the TabController
 class PlantDetail extends StatefulWidget {
   final String plantId;
   const PlantDetail({super.key, required this.plantId});
@@ -23,8 +22,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // You can also fetch data here if needed
-    // Get.find<ScheduledTasksController>().fetchTasksForPlant(widget.plantId);
   }
 
   @override
@@ -69,11 +66,8 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (_tabController.index == 0) {
-              // Navigate to AddScheduledTaskScreen
               Get.to(() => AddScheduledTaskScreen(plantId: widget.plantId));
-              Get.snackbar('Navigate', 'Go to Add Scheduled Task Screen');
             } else {
-              // Navigate to AddCareLogScreen
               Get.snackbar('Navigate', 'Go to Add Care Log Screen');
             }
           },
@@ -81,7 +75,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
           child: const Icon(Icons.add, color: Colors.white),
         ),
         backgroundColor: const Color(0xFFEDFFF1),
-        // We use NestedScrollView to coordinate scrolling between the header and the tab content
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
@@ -104,7 +97,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
                   ),
                 ),
               ),
-              // This sliver contains the plant name and action buttons
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -156,7 +148,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
                   ),
                 ),
               ),
-              // This makes the TabBar stick to the top when you scroll
               SliverPersistentHeader(
                 delegate: _SliverAppBarDelegate(
                   TabBar(
@@ -174,7 +165,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
               ),
             ];
           },
-          // The body contains the content for each tab
           body: TabBarView(
             controller: _tabController,
             children: [
@@ -188,7 +178,6 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
   }
 }
 
-// A custom delegate to make the TabBar work inside a SliverPersistentHeader
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this._tabBar);
 
@@ -202,7 +191,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: const Color(0xFFEDFFF1), // Match the scaffold background
+      color: const Color(0xFFEDFFF1),
       child: _tabBar,
     );
   }
@@ -213,18 +202,14 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-
-// --- Placeholder Widget for the Scheduled Tasks Tab ---
 class _ScheduledTasksView extends StatelessWidget {
   final String plantId;
   const _ScheduledTasksView({required this.plantId});
 
   @override
   Widget build(BuildContext context) {
-    // You can use your ScheduledTasksController here
     final controller = Get.put(ScheduledTasksController());
 
-    // Fetch tasks when this widget is built
     controller.fetchTasksForPlant(plantId);
 
     return Obx(() {
@@ -239,7 +224,6 @@ class _ScheduledTasksView extends StatelessWidget {
           ),
         );
       }
-      // Build your list of tasks here
       return ListView.builder(
         itemCount: controller.tasksForCurrentPlant.length,
         itemBuilder: (context, index) {
@@ -248,6 +232,12 @@ class _ScheduledTasksView extends StatelessWidget {
             leading: const Icon(Icons.notifications_active_outlined, color: Color(0xFF046526)),
             title: Text(task.title),
             subtitle: Text('Due: ${DateFormat.yMMMMd().format(task.scheduledAt.toDate())}'),
+            onTap: () => {
+              Get.to(() => AddScheduledTaskScreen(
+                plantId: task.plantId,
+                task: task,
+              ))
+            },
           );
         },
       );

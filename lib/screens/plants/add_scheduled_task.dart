@@ -160,6 +160,40 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
     }
   }
 
+  void _deleteTask() {
+    Get.defaultDialog(
+      title: "Delete Task",
+      middleText: "Are you sure you want to delete this task? This action cannot be undone.",
+      textConfirm: "Delete",
+      textCancel: "Cancel",
+      confirmTextColor: Colors.white,
+      // buttonColor: Colors.red.shade700,
+      onConfirm: () async {
+        try {
+          Get.back();
+          // Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+          final tasksController = Get.find<ScheduledTasksController>();
+          await _notificationService.cancelNotification(widget.task!.id!.hashCode);
+          await tasksController.deleteScheduledTask(widget.plantId, widget.task!.id!);
+
+          // Get.back();
+          Get.back();
+
+          Get.snackbar('Success', 'Task was successfully deleted.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white);
+        } catch (e) {
+          if(Get.isDialogOpen ?? false) Get.back();
+          Get.snackbar('Error', 'Failed to delete task: ${e.toString()}',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.shade700,
+              colorText: Colors.white);
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const labelStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 14);
@@ -170,6 +204,13 @@ class _AddScheduledTaskScreenState extends State<AddScheduledTaskScreen> {
         title: Text(isEditMode ? 'Edit Task' : 'Schedule New Task'),
         backgroundColor: const Color(0xFF046526),
         foregroundColor: Colors.white,
+        actions: [
+          if (isEditMode)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _deleteTask,
+            ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

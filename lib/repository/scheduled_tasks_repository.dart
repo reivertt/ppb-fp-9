@@ -69,7 +69,8 @@ class ScheduledTasksRepository extends GetxController {
           .get();
       return snapshot.docs.map((document) => ScheduledTasksModel.fromFirestore(document, null)).toList();
     } catch (e) {
-      throw Exception('Error updating plant from Firestore: $e');
+      print("DEBUG task - Error: $e");
+      throw Exception('Error fetching tasks from Firestore: $e');
     }
   }
 
