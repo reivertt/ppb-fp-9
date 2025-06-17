@@ -38,12 +38,13 @@ class PlantsRepository extends GetxController {
     }
   }
 
-
-  Future<void> updatePlantDetails(PlantsModel updatedPlant) async {
+  Future<void> updatePlant(PlantsModel updatedPlant) async {
     try {
-      await _db.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants").doc(updatedPlant.id).update(updatedPlant.toFirestore());
+      await _db
+          .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection("plants").doc(updatedPlant.id).update(updatedPlant.toFirestore());
     } catch (e) {
-      throw 'Something went wrong. Please try again';
+      throw Exception('Error updating plant in Firestore: $e');
     }
   }
 
@@ -54,20 +55,18 @@ class PlantsRepository extends GetxController {
           .doc(plantId)
           .update(json);
     } catch (e) {
-      throw 'Something went wrong. Please try again';
+      throw Exception('Error updating plant from Firestore: $e');
     }
   }
 
-  Future<void> removeUserRecord(String plantId) async {
+  Future<void> deletePlant(String plantId) async {
     try {
-      // final currentUid = FirebaseAuth.instance.currentUser?.uid;
-      // if (currentUid != userId) {
-      //   throw 'Unauthorized action';
-      // }
-      await _db.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).collection("plants").doc(plantId).delete();
+      await _db
+          .collection("users").doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection("plants").doc(plantId).delete();
     } catch (e) {
-      rethrow;
-      // throw 'Something went wrong. Please try again';
+      // Re-throw the error to be caught by the controller
+      throw Exception('Error deleting plant from Firestore: $e');
     }
   }
 

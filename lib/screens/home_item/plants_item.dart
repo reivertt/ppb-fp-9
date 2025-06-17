@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
-import '../home.dart';
-import '../plant_detail.dart';
-import '../plants/add_plant.dart';
-import 'encyclopedia_item.dart';
+import 'package:ppb_fp_9/screens/home.dart';
+import 'package:ppb_fp_9/screens/plants/plant_detail.dart';
+import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 
 class PlantsItem extends StatefulWidget {
   const PlantsItem({super.key});
@@ -90,10 +89,8 @@ class _PlantsItemState extends State<PlantsItem> {
 
             return InkWell(
               onTap: () {
-                // 2. NAVIGASI KE HALAMAN DETAIL DENGAN MENGIRIM DATA
                 Get.to(() => PlantDetail(
-                  plantName: plant.commonName,
-                  docID: plant.id!, // Pastikan model Anda punya properti 'id' untuk docID
+                  plantId: plantsController.allPlants[index].id!,
                 ));
               },
               child: Card(
@@ -107,7 +104,7 @@ class _PlantsItemState extends State<PlantsItem> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Image.network(
-                      plant.imgUrl.isNull ? "https://picsum.photos/id/237/200/300" : plant.imgUrl!,
+                      plant.imgUrl.isNull ? "https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png" : plant.imgUrl!,
                       height: 150,
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
@@ -121,7 +118,7 @@ class _PlantsItemState extends State<PlantsItem> {
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        plant.commonName,
+                        plant.customName.isNull ? plant.commonName : plant.customName!,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),

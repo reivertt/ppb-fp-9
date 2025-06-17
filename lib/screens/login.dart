@@ -7,27 +7,24 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.put(AuthenticationController());
-    // final authController = Get.find<AuthenticationController>();
+    final authController = Get.find<AuthenticationController>();
 
     void navigateRegister() {
-      Get.offAllNamed('register');
+      Get.toNamed('/register');
     }
 
     return Scaffold(
-      // backgroundColor: const Color(0xFFDEFFE7),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(64, 128, 64, 64),
-        child: Center(
-          child: ListView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(64, 128, 64, 64),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 48),
-              // Icon(Icons.lock_outline, size: 100, color: Colors.blue[200]),
               Image.asset(
                 'assets/LOGO.png',
                 height: 130,
                 width: 90,
-                // color: Colors.blue[200],
               ),
               const SizedBox(height: 48),
               TextField(
@@ -71,27 +68,37 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Obx(() {
                 return authController.errorCode.value.isNotEmpty
-                  ? Column(
-                    children: [
-                      Text(authController.errorCode.value, style: TextStyle(color: Colors.red)),
-                      const SizedBox(height: 12)
-                    ],
-                  ) : const SizedBox.shrink();
+                    ? Column(
+                  children: [
+                    Text(authController.errorCode.value, style: TextStyle(color: Colors.red)),
+                    const SizedBox(height: 12)
+                  ],
+                ) : const SizedBox.shrink();
               }),
               Obx(() {
-                return OutlinedButton(
-                  onPressed: authController.isLoading.value ? null : () => authController.signIn(),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.all(16),
-                    backgroundColor: Color(0xFF046526),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6)
+                return SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: authController.isLoading.value ? null : () => authController.signIn(),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(16),
+                      backgroundColor: Color(0xFF046526),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)
+                      ),
                     ),
+                    child: authController.isLoading.value
+                        ? const SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3.0,
+                            ),
+                          )
+                        : const Text('Login', style: TextStyle(fontSize: 16)),
                   ),
-                  child: authController.isLoading.value
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Login', style: TextStyle(fontSize: 16)),
                 );
               }),
               Row(

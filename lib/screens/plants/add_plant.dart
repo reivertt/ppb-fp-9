@@ -6,9 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
 
 import 'package:ppb_fp_9/models/plants_model.dart';
+import 'package:ppb_fp_9/models/species_model.dart';
 
 class AddPlantScreen extends StatefulWidget {
-  const AddPlantScreen({super.key});
+  final PlantsModel? plant;
+  const AddPlantScreen({super.key, this.plant});
 
   @override
   State<AddPlantScreen> createState() => _AddPlantScreenState();
@@ -19,9 +21,29 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
   final _commonNameController = TextEditingController();
   final _customNameController = TextEditingController();
 
+  bool get isEditMode => widget.plant != null;
+
   DateTime? _selectedPlantedDate;
   bool _isSaving = false;
+  String? _imageUrl;
 
+  @override
+  void initState(){
+    super.initState();
+    if (isEditMode) {
+      print("DEBUG add-plant isEditMode");
+      _commonNameController.text = widget.plant!.commonName;
+      _customNameController.text = widget.plant!.customName ?? '';
+      _selectedPlantedDate = widget.plant!.plantedDate?.toDate();
+      _imageUrl = widget.plant!.imgUrl;
+    }
+    else if (Get.arguments != null && Get.arguments is SpeciesModel) {
+      print("DEBUG add-plant arguments called");
+      final species = Get.arguments as SpeciesModel;
+      _commonNameController.text = species.commonName ?? '';
+      _imageUrl = species.imgUrl;
+    }
+  }
   @override
   void dispose() {
     _commonNameController.dispose();
@@ -67,25 +89,50 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
 
     try {
       final plantsController = Get.find<PlantsController>();
-      final now = Timestamp.now();
-      final newPlant = PlantsModel(
-        userId: user.uid,
-        commonName: _commonNameController.text,
-        customName: _customNameController.text.isNotEmpty ? _customNameController.text : null,
-        plantedDate: Timestamp.fromDate(_selectedPlantedDate!),
-        createdAt: now,
-        updatedAt: now,
-      );
-      await plantsController.savePlant(newPlant);
-      await plantsController.fetchAllPlants();
-      Get.snackbar(
-        'Success',
-        '${newPlant.commonName} was added to your garden!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF046526),
-        colorText: Colors.white,
-      );
-      if (mounted) Navigator.pop(context);
+      if (isEditMode) {
+        // --- UPDATE LOGIC ---
+        final updatedPlant = PlantsModel(
+          id: widget.plant!.id,
+          userId: user.uid,
+          commonName: _commonNameController.text,
+          customName: _customNameController.text.isNotEmpty ? _customNameController.text : null,
+          imgUrl: _imageUrl,
+          plantedDate: Timestamp.fromDate(_selectedPlantedDate!),
+          createdAt: widget.plant!.createdAt, // Keep original creation date
+          updatedAt: Timestamp.now(), // Set new update date
+        );
+        await plantsController.updatePlant(updatedPlant);
+        Get.back(); // Go back from edit screen
+        Get.snackbar(
+            'Success',
+            '${updatedPlant.commonName} was updated!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+        );
+
+      } else {
+        final now = Timestamp.now();
+        final newPlant = PlantsModel(
+          userId: user.uid,
+          commonName: _commonNameController.text,
+          customName: _customNameController.text.isNotEmpty ? _customNameController.text : null,
+          imgUrl: _imageUrl,
+          plantedDate: Timestamp.fromDate(_selectedPlantedDate!),
+          createdAt: now,
+          updatedAt: now,
+        );
+        await plantsController.savePlant(newPlant);
+        await plantsController.fetchAllPlants();
+        Get.snackbar(
+          'Success',
+          '${newPlant.commonName} was added to your garden!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF046526),
+          colorText: Colors.white,
+        );
+        if (mounted) Navigator.pop(context);
+      }
     } finally {
       setState(() { _isSaving = false; });
     }
@@ -99,7 +146,7 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFEDFFF1),
       appBar: AppBar(
-        title: const Text('Add Your Own Plant'),
+        title: Text(isEditMode ? 'Edit Your Plant' : 'Add Your Own Plant'),
         backgroundColor: const Color(0xFF046526),
         foregroundColor: Colors.white,
       ),
@@ -109,7 +156,6 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // --- 1. COMMON NAME FIELD ---
               const Text('Common Name*', style: labelStyle),
               const SizedBox(height: 8),
               TextFormField(
@@ -131,7 +177,6 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               ),
               const SizedBox(height: 24),
 
-              // --- 2. CUSTOM NAME FIELD ---
               const Text('Custom Name / Nickname (Optional)', style: labelStyle),
               const SizedBox(height: 8),
               TextFormField(
@@ -147,7 +192,6 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               ),
               const SizedBox(height: 24),
 
-              // --- 3. PLANTED DATE FIELD ---
               const Text('Planted Date*', style: labelStyle),
               const SizedBox(height: 8),
               Container(
@@ -179,7 +223,6 @@ class _AddPlantScreenState extends State<AddPlantScreen> {
               ),
               const SizedBox(height: 32),
 
-              // --- SUBMIT BUTTON ---
               ElevatedButton(
                 onPressed: _isSaving ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
