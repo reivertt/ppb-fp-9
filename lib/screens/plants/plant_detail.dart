@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ppb_fp_9/controller/care_logs_controller.dart';
 import 'package:ppb_fp_9/controller/scheduled_tasks_controller.dart';
 import 'package:ppb_fp_9/models/plants_model.dart';
 import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
 import 'package:ppb_fp_9/screens/plants/add_scheduled_task.dart';
-import 'package:ppb_fp_9/screens/plants/plant_logs.dart';
+import 'package:ppb_fp_9/screens/plants/add_care_logs.dart';
+
+import '../../models/care_logs_model.dart';
 
 class PlantDetail extends StatefulWidget {
   final String plantId;
@@ -34,6 +37,7 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final plantsController = Get.find<PlantsController>();
+    Get.put(CareLogsController());
 
     void showDeleteConfirmationDialog(PlantsModel plant) {
       Get.defaultDialog(
@@ -69,7 +73,7 @@ class _PlantDetailState extends State<PlantDetail> with SingleTickerProviderStat
             if (_tabController.index == 0) {
               Get.to(() => AddScheduledTaskScreen(plantId: widget.plantId));
             } else {
-              Get.snackbar('Navigate', 'Go to Add Care Log Screen');
+              Get.to(() => AddCareLogsScreen(plantId: widget.plantId));
             }
           },
           backgroundColor: const Color(0xFF046526),
@@ -210,7 +214,6 @@ class _ScheduledTasksView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ScheduledTasksController());
-
     controller.fetchTasksForPlant(plantId);
 
     return Obx(() {
@@ -225,7 +228,8 @@ class _ScheduledTasksView extends StatelessWidget {
           ),
         );
       }
-      return ListView.builder(
+      return ListView.separated(
+        padding: EdgeInsets.zero,
         itemCount: controller.tasksForCurrentPlant.length,
         itemBuilder: (context, index) {
           final task = controller.tasksForCurrentPlant[index];
@@ -241,24 +245,52 @@ class _ScheduledTasksView extends StatelessWidget {
             },
           );
         },
+        separatorBuilder: (context, index) {
+          return Divider(height: 1, color: Colors.grey.shade300);
+        },
       );
     });
   }
 }
 
-// --- Placeholder Widget for the Care Log Tab ---
 class _CareLogView extends StatelessWidget {
   final String plantId;
   const _CareLogView({required this.plantId});
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Implement your Care Log UI here
-    return const Center(
-      child: Text(
-        "Care Log feature coming soon!",
-        style: TextStyle(color: Colors.grey),
-      ),
-    );
+    final controller = Get.find<CareLogsController>();
+    controller.fetchCareLogs(plantId);
+    print("DEBUG plantdetail carelogs called");
+    return Obx(() {
+      if (controller.isLoading.value){
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.careLogs.isEmpty) {
+        return const Center(
+          child: Text("No care logs yet.", style: TextStyle(color: Colors.grey))
+        );
+      }
+      return ListView.separated(
+        padding: EdgeInsets.zero,
+        itemCount: controller.careLogs.length,
+        itemBuilder: (context, index) {
+          final log = controller.careLogs[index];
+          return ListTile(
+            title: Text(log.title),
+            subtitle: Text(log.description!),
+            trailing: Text(DateFormat.yMd().format(log.eventDate.toDate())),
+            onTap: () => {
+              Get.to(() => AddCareLogsScreen(
+                  plantId: plantId,
+                  log: log))
+            },
+          );
+        },
+        separatorBuilder: (context, index) {
+          return Divider(height: 1, color: Colors.grey.shade300);
+        },
+      );
+    });
   }
 }

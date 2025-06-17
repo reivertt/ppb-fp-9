@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ppb_fp_9/controller/plants_controller.dart';
-import '../home.dart';
-import '../plant_detail.dart';
-import '../plants/add_plant.dart';
-import 'encyclopedia_item.dart';
+import 'package:ppb_fp_9/screens/home.dart';
+import 'package:ppb_fp_9/screens/plants/plant_detail.dart';
+import 'package:ppb_fp_9/screens/plants/add_plant.dart';
 
 class PlantsItem extends StatefulWidget {
   const PlantsItem({super.key});
